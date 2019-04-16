@@ -16,13 +16,13 @@
 */
 
 package com.droneah.listapps;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 
 /**
@@ -39,6 +39,12 @@ public class ListAppsTest {
 
     @Test
     public void testGetInstalledApps() {
+
+		if (!System.getProperty("os.name").startsWith("Windows")) {
+			// tests will fail
+			return;
+		}
+
         // Doesn't actually assert anything, but outputs the list
         Map<String, Software> list = ListApps.getInstalledApps(false);
         SortedSet<String> names = new TreeSet<>(list.keySet());

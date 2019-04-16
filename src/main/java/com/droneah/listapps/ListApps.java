@@ -17,12 +17,17 @@
 
 package com.droneah.listapps;
 
-import com.sun.jna.platform.win32.Advapi32Util;
-import com.sun.jna.platform.win32.WinReg;
-
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.sun.jna.platform.win32.Advapi32Util;
+import com.sun.jna.platform.win32.Advapi32Util.InfoKey;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinReg;
+import com.sun.jna.platform.win32.WinReg.HKEYByReference;
 
 /**
  *
@@ -67,13 +72,26 @@ public class ListApps {
                 String icon = (String) vals.get("DisplayIcon");
                 String publisher = (String) vals.get("Publisher");
 
+                // Get Installation Date/Time
+                // NOTE: Windows Installer et al will use the InstallDate property to set the installation date, but
+                // this is simpler, and for our purposes, probably accurate enough. Besides, InstallDate property is only
+                // granular enough to day, while this one goes all the way to milliseconds (though accuracy is questionable)
+                HKEYByReference subKey = Advapi32Util.registryGetKey(hkey,  rootKey + "\\" + subKeyName, WinNT.KEY_READ);
+                InfoKey infoKey = Advapi32Util.registryQueryInfoKey(subKey.getValue(), 0);
+                LocalDateTime installDate = infoKey
+                                                .lpftLastWriteTime
+                                                .toDate()
+                                                .toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDateTime();
+
 
                 // Not Windows Installer
                 if (vals.get("WindowsInstaller") == null || !vals.get("WindowsInstaller").equals(1)) {
 
                     String releaseType = (String) vals.get("ReleaseType");
 
-                    Software software = new Software(rootKey + "\\" + subKeyName, name, publisher, installLocation, version, icon);
+                    Software software = new Software(rootKey + "\\" + subKeyName, name, publisher, installLocation, installDate, version, icon);
 
                     Pattern windowsUpdateRegex = Pattern.compile("KB[0-9]{6}$");
                     Matcher m = windowsUpdateRegex.matcher(subKeyName);
@@ -113,7 +131,7 @@ public class ListApps {
                     }
 
                     if (!name.equals("")) {
-                        Software software = new Software(rootKey + "\\" + subKeyName, name, publisher, installLocation, version, icon);
+                        Software software = new Software(rootKey + "\\" + subKeyName, name, publisher, installLocation, installDate, version, icon);
                         list.put(software.getDisplayName(), software);
                     }
 

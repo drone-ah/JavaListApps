@@ -52,7 +52,7 @@ public class ListAppsTest {
         System.out.println(names.size());
 
         for(String name: names) {
-            System.out.println(name);
+            System.out.println(name + " | " + list.get(name).getInstallDate());
         }
 
 

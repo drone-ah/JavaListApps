@@ -17,6 +17,7 @@
 
 package com.droneah.listapps;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,13 +27,15 @@ import java.util.Set;
  */
 public class Software {
 
-    public Software(String regKey, String displayName, String publisher, String installLocation, String version, String icon) {
+    public Software(String regKey, String displayName, String publisher, String installLocation, LocalDateTime installDate, String version, String icon) {
         addRegKey(regKey);
         setDisplayName(displayName);
         setPublisher(publisher);
         setInstallLocation(installLocation);
+        setInstallDate(installDate);
         setVersion(version);
         setIcon(icon);
+
     }
 
     private Set<String> regKeys = new HashSet<>();
@@ -46,6 +49,8 @@ public class Software {
     private String version;
 
     private String icon;
+
+    private LocalDateTime installDate;
 
     public void addRegKey(String key) {
 
@@ -106,4 +111,12 @@ public class Software {
     public void setPublisher(String publisher) {
         this.publisher = nullifEmpty(publisher);
     }
+
+	public LocalDateTime getInstallDate() {
+		return installDate;
+	}
+
+	public void setInstallDate(LocalDateTime installDate) {
+		this.installDate = installDate;
+	}
 }
